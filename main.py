@@ -1,8 +1,9 @@
-from typing import List
-
-from fastapi import FastAPI, Response
-from pydantic import BaseModel
+from fastapi import FastAPI, Depends
+from fastapi.security import APIKeyHeader
 from starlette.middleware.cors import CORSMiddleware
+
+from model.result import Result
+from module.result import create_result, update_result, read_result, delete_result
 
 app = FastAPI()
 
@@ -14,64 +15,47 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-
-class Count(BaseModel):
-    argument: str
-    value: int
+api_key = APIKeyHeader(name="Authorization", auto_error=False)
 
 
-class Counts(BaseModel):
-    results: List[Count]
+@app.post("/result")
+async def create_result_controller(result: Result,
+                                   authorization: str = Depends(api_key)):
+
+    user_id = authorization.split()[1]
+    create_result(result,
+                  user_id)
+
+    return result
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.put("/result")
+async def update_result_controller(result: Result,
+                                   authorization: str = Depends(api_key)):
+
+    user_id = authorization.split()[1]
+    update_result(result,
+                  user_id)
+
+    return result
 
 
-@app.get("/counts")
-async def read_count(PoseName: str, response: Response):
-    """
-    過去のカウント数を取得する関数
-    Query
-    type_key: 運動タイプ
-    month_key: 月
+@app.get("/result")
+async def read_result_controller(pose: str, authorization: str = Depends(api_key)):
+    user_id = authorization.split()[1]
 
-    Header
-    Bearer Token: GoogleJWTToken
-    """
-    if PoseName == 'Squat':
-        response_data = {
-            "results": [
-                {"argument": "01-03", "value": 20},
-                {"argument": "01-04", "value": 10},
-                {"argument": "01-05", "value": 0},
-                {"argument": "01-06", "value": 10},
-                {"argument": "01-07", "value": 30},
-                {"argument": "01-08", "value": 0},
-                {"argument": "01-09", "value": 10},
-                {"argument": "01-10", "value": 30}
-            ],
-            "status": 200
-        }
-    elif PoseName == 'PushUp':
-        response_data = {
-            "results": [
-                {"argument": "01-03", "value": 30},
-                {"argument": "01-04", "value": 40},
-                {"argument": "01-05", "value": 10},
-                {"argument": "01-06", "value": 0},
-                {"argument": "01-07", "value": 0},
-                {"argument": "01-08", "value": 20},
-                {"argument": "01-09", "value": 30},
-                {"argument": "01-10", "value": 0}
-            ],
-            "status": 200
-        }
-    else:
-        response_data = {
-            "status": 404
-        }
-        response.status_code = 404
+    result = Result()
+    result.result_name = pose
+    response_list = read_result(result, user_id)
 
-    return response_data
+    return {"results": response_list}
+
+
+@app.delete("/result")
+async def delete_result_controller(result: Result,
+                                   authorization: str = Depends(api_key)):
+    user_id = authorization.split()[1]
+    delete_result(result,
+                  user_id)
+
+    return result
