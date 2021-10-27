@@ -2,8 +2,12 @@ from fastapi import FastAPI, Depends
 from fastapi.security import APIKeyHeader
 from starlette.middleware.cors import CORSMiddleware
 
-from model.result import Result
+# model
+from model.result import CreateResult, UpdateResult, DeleteResult
+
+# module
 from module.result import create_result, update_result, read_result, delete_result
+from module.token_func import user_id_get
 
 app = FastAPI()
 
@@ -19,10 +23,9 @@ api_key = APIKeyHeader(name="Authorization", auto_error=False)
 
 
 @app.post("/result")
-async def create_result_controller(result: Result,
+async def create_result_controller(result: CreateResult,
                                    authorization: str = Depends(api_key)):
-
-    user_id = authorization.split()[1]
+    user_id = user_id_get(authorization.split()[1])
     create_result(result,
                   user_id)
 
@@ -30,10 +33,9 @@ async def create_result_controller(result: Result,
 
 
 @app.put("/result")
-async def update_result_controller(result: Result,
+async def update_result_controller(result: UpdateResult,
                                    authorization: str = Depends(api_key)):
-
-    user_id = authorization.split()[1]
+    user_id = user_id_get(authorization.split()[1])
     update_result(result,
                   user_id)
 
@@ -42,19 +44,17 @@ async def update_result_controller(result: Result,
 
 @app.get("/result")
 async def read_result_controller(pose: str, authorization: str = Depends(api_key)):
-    user_id = authorization.split()[1]
+    user_id = user_id_get(authorization.split()[1])
 
-    result = Result()
-    result.result_name = pose
-    response_list = read_result(result, user_id)
+    response_list = read_result(pose, user_id)
 
     return {"results": response_list}
 
 
 @app.delete("/result")
-async def delete_result_controller(result: Result,
+async def delete_result_controller(result: DeleteResult,
                                    authorization: str = Depends(api_key)):
-    user_id = authorization.split()[1]
+    user_id = user_id_get(authorization.split()[1])
     delete_result(result,
                   user_id)
 

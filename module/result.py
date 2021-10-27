@@ -2,7 +2,8 @@ import os
 import sqlite3
 
 # DB_NAME = os.getenv("DB_NAME")
-from model.result import Result
+# model
+from model.result import CreateResult, UpdateResult, DeleteResult
 
 DB_NAME = "app.db"
 
@@ -11,10 +12,10 @@ conn.row_factory = sqlite3.Row
 cur = conn.cursor()
 
 
-def create_result(result: Result, user_id: str) -> None:
+def create_result(result: CreateResult, user_id: str) -> None:
     """
     運動結果を1件追加する関数
-    :param result: Result
+    :param result: CreateResult
     :param user_id: str
     :return:
     """
@@ -28,11 +29,11 @@ def create_result(result: Result, user_id: str) -> None:
     return
 
 
-def update_result(result: Result,
+def update_result(result: UpdateResult,
                   user_id: str) -> None:
     """
     運動結果を1件更新する関数
-    :param result:
+    :param result: UpdateResult
     :param user_id:
     :return:
     """
@@ -47,27 +48,28 @@ def update_result(result: Result,
     return
 
 
-def read_result(result: Result,
+def read_result(result_name: str,
                 user_id: str) -> list:
     """
     運動結果をリストで返す関数
+    :param result_name: str
     :param user_id: str
     :return:
     """
 
     cur.execute("SELECT result_time as argument, result_count as value "
                 "FROM result WHERE result_name = ? and user_id = ?",
-                (result.result_name, user_id, ))
+                (result_name, user_id, ))
 
     response_list = cur.fetchall()
     return response_list
 
 
-def delete_result(result: Result,
+def delete_result(result: DeleteResult,
                   user_id: str) -> None:
     """
     運動結果を1件削除する関数
-    :param result: Result
+    :param result: DeleteResult
     :param user_id: str
     :return:
     """
