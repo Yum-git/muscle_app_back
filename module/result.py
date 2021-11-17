@@ -76,4 +76,5 @@ def delete_result(result: DeleteResult,
 
     cur.execute("DELETE FROM result WHERE id = ? AND user_id = ?",
                 (result.id_, user_id))
+    conn.commit()
     return
