@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.security import APIKeyHeader
 
 from model.plan import CreatePlan, UpdatePlan, DeletePlan
-from module.plan import create_plan, read_plan, delete_plan
+from module.plan import create_plan, read_plan, delete_plan, update_plan
 from module.token_func import user_id_get
 
 router = APIRouter()
@@ -23,6 +23,7 @@ async def create_plan_controller(plan: CreatePlan,
 async def update_plan_controller(plan: UpdatePlan,
                                  authorization: str = Depends(api_key)):
     user_id = user_id_get(authorization.split()[1])
+    update_plan(plan, user_id)
 
     return plan
 

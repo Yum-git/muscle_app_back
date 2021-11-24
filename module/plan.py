@@ -32,9 +32,23 @@ def create_plan(plan: CreatePlan, user_id: str) -> None:
     return
 
 
-# 保留　ちょっと構造考える
 def update_plan(plan: UpdatePlan, user_id: str) -> None:
-    cur.execute("UPDATE plan SET user_id = ?, plan_name = ?, start_time")
+    cur.execute("UPDATE plan SET "
+                "user_id = ?, "
+                "plan_name = CASE WHEN ? IS NOT NULL THEN ? ELSE plan_name END, "
+                "start_time = CASE WHEN ? IS NOT NULL THEN ? ELSE start_time END, " 
+                "end_time = CASE WHEN ? IS NOT NULL THEN ? ELSE end_time END, "
+                "plan_notes = CASE WHEN ? IS NOT NULL THEN ? ELSE plan_notes END "
+                "WHERE id = ? ",
+                (
+                    user_id,
+                    plan.plan_name, plan.plan_name,
+                    plan.start_time, plan.start_time,
+                    plan.end_time, plan.end_time,
+                    plan.plan_notes, plan.plan_notes,
+                    plan.id_
+                ))
+    conn.commit()
 
 
 def read_plan(user_id: str) -> list:
@@ -43,7 +57,7 @@ def read_plan(user_id: str) -> list:
     :param user_id: str
     :return: list
     """
-    cur.execute("SELECT id, plan_name, start_time, end_time, plan_notes "
+    cur.execute("SELECT id, plan_name as title, start_time as startDate, end_time as endDate, plan_notes as notes "
                 "FROM plan WHERE user_id = ? ",
                 (user_id, ))
 
