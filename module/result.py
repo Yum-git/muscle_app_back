@@ -57,8 +57,10 @@ def read_result(result_name: str,
     :return:
     """
 
-    cur.execute("SELECT result_time as argument, result_count as value "
-                "FROM result WHERE result_name = ? and user_id = ?",
+    cur.execute("SELECT result_time as argument, sum(result_count) as value "
+                "FROM result WHERE result_name = ? and user_id = ? "
+                "GROUP BY result_time "
+                "ORDER BY result_time ",
                 (result_name, user_id, ))
 
     response_list = cur.fetchall()
