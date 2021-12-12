@@ -77,3 +77,21 @@ def delete_plan(plan: DeletePlan, user_id: str) -> None:
     conn.commit()
 
     return
+
+
+def read_plan_for_result(user_id: str) -> list:
+    """
+    運動結果を運動予定形式にてリストで返す関数
+    :param user_id: str
+    :return: list
+    """
+    cur.execute("SELECT result_name || sum(result_count) as title, "
+                "result_time || 'T15:00:00.000Z' as startDate, result_time || 'T16:00:00.000Z'as endDate, "
+                "result_name "
+                "FROM result WHERE user_id = ? "
+                "GROUP BY result_time, result_name "
+                "ORDER BY result_time ",
+                (user_id, ))
+
+    response_list = cur.fetchall()
+    return response_list

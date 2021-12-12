@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.security import APIKeyHeader
 
 from model.plan import CreatePlan, UpdatePlan, DeletePlan
-from module.plan import create_plan, read_plan, delete_plan, update_plan
+from module.plan import create_plan, read_plan, delete_plan, update_plan, read_plan_for_result
 from module.token_func import user_id_get
 
 router = APIRouter()
@@ -43,3 +43,11 @@ async def delete_plan_controller(plan: DeletePlan,
     delete_plan(plan, user_id)
 
     return plan
+
+
+@router.get("/plan_result", tags=["plan"])
+async def read_plan_for_result_controller(authorization: str = Depends(api_key)):
+    user_id = user_id_get(authorization.split()[1])
+    response_list = read_plan_for_result(user_id)
+
+    return {"results": response_list}
